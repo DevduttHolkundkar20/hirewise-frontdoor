@@ -83,7 +83,6 @@ const Index = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-subtle">
-      {/* Decorative elements */}
       <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
 
@@ -93,7 +92,6 @@ const Index = () => {
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="relative z-10 mx-4 w-full max-w-lg text-center"
       >
-        {/* Logo / Icon */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -103,12 +101,12 @@ const Index = () => {
           <Sparkles className="h-8 w-8 text-primary-foreground" />
         </motion.div>
 
-        <h1 className="mb-4 font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-          AI Hiring & Interview Preparation Platform
+        <h1 className="mb-2 font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
+          HireSphere AI
         </h1>
 
         <p className="mx-auto mb-10 max-w-md text-lg text-muted-foreground">
-          Smart recruitment and intelligent interview preparation powered by AI.
+          Intelligent Hiring. Smarter Preparation.
         </p>
 
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
