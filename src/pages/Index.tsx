@@ -23,7 +23,7 @@ const RoleModal = ({ mode, onClose }: { mode: AuthMode; onClose: () => void }) =
           onClick={onClose}
         >
           <motion.div
-            className="relative w-full max-w-md mx-4 rounded-2xl bg-card p-8 shadow-card-hover"
+            className="relative w-full max-w-md mx-4 rounded-2xl glass-card p-8 shadow-card-hover"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -114,7 +114,7 @@ const Index = () => {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setAuthMode("login")}
-            className="w-full rounded-xl bg-primary px-8 py-3.5 font-semibold text-primary-foreground shadow-hero-glow transition-shadow hover:shadow-lg sm:w-auto"
+            className="btn-gradient w-full rounded-xl px-8 py-3.5 font-semibold text-primary-foreground shadow-hero-glow sm:w-auto"
           >
             Login
           </motion.button>
@@ -123,7 +123,7 @@ const Index = () => {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setAuthMode("register")}
-            className="w-full rounded-xl border border-border bg-card px-8 py-3.5 font-semibold text-foreground shadow-card transition-all hover:shadow-card-hover sm:w-auto"
+            className="w-full rounded-xl border border-border glass-card px-8 py-3.5 font-semibold text-foreground shadow-card transition-all hover:shadow-card-hover sm:w-auto"
           >
             Register
           </motion.button>

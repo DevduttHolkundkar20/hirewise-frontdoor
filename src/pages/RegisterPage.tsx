@@ -26,7 +26,7 @@ const RegisterPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-subtle">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-4 w-full max-w-md">
-        <div className="rounded-2xl bg-card p-8 shadow-card">
+        <div className="rounded-2xl glass-card p-8 shadow-card-hover">
           <button onClick={() => navigate("/")} className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
@@ -49,7 +49,7 @@ const RegisterPage = () => {
             <Field icon={<Lock />} label="Password" type="password" placeholder="••••••••" value={form.password} onChange={v => update("password", v)} />
             <Field icon={<Lock />} label="Confirm Password" type="password" placeholder="••••••••" value={form.confirmPassword} onChange={v => update("confirmPassword", v)} />
 
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground shadow-hero-glow transition-shadow hover:shadow-lg">
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn-gradient w-full rounded-xl py-3.5 font-semibold text-primary-foreground shadow-hero-glow">
               Create Account
             </motion.button>
           </form>
