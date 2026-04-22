@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Lock } from "lucide-react";
+import { AuthBackground } from "@/components/AuthBackground";
 
 const LoginPage = () => {
   const { role } = useParams<{ role: string }>();
@@ -18,12 +19,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-subtle">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-subtle">
+      <AuthBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-4 w-full max-w-md"
+        className="relative z-10 mx-4 w-full max-w-md"
       >
         <div className="rounded-2xl glass-card p-8 shadow-card-hover">
           <button

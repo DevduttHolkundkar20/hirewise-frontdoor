@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Lock, User, Building2, Phone } from "lucide-react";
+import { AuthBackground } from "@/components/AuthBackground";
 
 const RegisterPage = () => {
   const { role } = useParams<{ role: string }>();
@@ -24,8 +25,9 @@ const RegisterPage = () => {
   const inputClass = "w-full rounded-xl border border-input bg-background py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-subtle">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-4 w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-subtle">
+      <AuthBackground />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative z-10 mx-4 w-full max-w-md">
         <div className="rounded-2xl glass-card p-8 shadow-card-hover">
           <button onClick={() => navigate("/")} className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back
