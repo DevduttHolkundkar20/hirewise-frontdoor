@@ -38,17 +38,26 @@ const recentJobs = [
 export default function RecruiterDashboard() {
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">AI-powered hiring insights at a glance.</p>
+        </div>
+        <div className="hidden items-center gap-2 rounded-full border border-ai/30 bg-ai/5 px-3 py-1.5 text-xs font-medium text-ai sm:flex">
+          <span className="h-1.5 w-1.5 rounded-full bg-ai animate-pulse" />
+          AI insights active
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(s => (
-          <div key={s.label} className="rounded-xl border border-border bg-card p-5 shadow-card">
+        {stats.map((s, i) => (
+          <div key={s.label} className="rounded-xl border border-border glass-card p-5 shadow-card hover-lift">
             <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.color}`}>
+              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${s.color}`}>
                 <s.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
                 <p className="font-display text-2xl font-bold text-foreground">{s.value}</p>
               </div>
             </div>
