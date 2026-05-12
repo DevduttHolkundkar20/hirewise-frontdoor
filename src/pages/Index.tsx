@@ -102,7 +102,7 @@ const Index = () => {
         </motion.div>
 
         <h1 className="mb-2 font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-          HireSphere AI
+          HireWise AI
         </h1>
 
         <p className="mx-auto mb-10 max-w-md text-lg text-muted-foreground">

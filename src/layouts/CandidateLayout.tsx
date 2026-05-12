@@ -30,7 +30,7 @@ function CandidateSidebar() {
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="font-display text-base font-bold text-gradient-primary">HireSphere AI</span>
+              <span className="font-display text-base font-bold text-gradient-primary">HireWise AI</span>
             )}
           </div>
           <SidebarGroupLabel className="font-display text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -68,6 +68,7 @@ function CandidateSidebar() {
 
 export default function CandidateLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-subtle">
@@ -81,7 +82,12 @@ export default function CandidateLayout() {
                 <Bell className="h-4 w-4" />
                 <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-ai" />
               </button>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-accent text-xs font-semibold text-primary-foreground">C</div>
+              <div 
+                onClick={() => navigate("/candidate/profile")}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gradient-accent text-xs font-semibold text-primary-foreground transition-transform hover:scale-110 active:scale-95"
+              >
+                C
+              </div>
             </div>
           </header>
           <main key={location.pathname} className="flex-1 overflow-auto p-6 animate-page-in">

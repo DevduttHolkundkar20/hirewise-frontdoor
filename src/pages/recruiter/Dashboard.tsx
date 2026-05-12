@@ -1,11 +1,12 @@
-import { Briefcase, Users, TrendingUp, Star } from "lucide-react";
+import { Briefcase, Users, TrendingUp, Star, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 
-const stats = [
-  { label: "Active Jobs", value: "12", icon: Briefcase, color: "bg-primary/10 text-primary" },
-  { label: "Total Applicants", value: "348", icon: Users, color: "bg-accent/10 text-accent" },
-  { label: "Avg Match Score", value: "78%", icon: TrendingUp, color: "bg-emerald-100 text-emerald-600" },
-  { label: "Shortlisted", value: "56", icon: Star, color: "bg-amber-100 text-amber-600" },
+const stats_initial = [
+  { label: "Active Jobs", value: "0", icon: Briefcase, color: "bg-primary/10 text-primary" },
+  { label: "Total Applicants", value: "0", icon: Users, color: "bg-accent/10 text-accent" },
+  { label: "Avg Match Score", value: "0%", icon: TrendingUp, color: "bg-emerald-100 text-emerald-600" },
+  { label: "Shortlisted", value: "0", icon: Star, color: "bg-amber-100 text-amber-600" },
 ];
 
 const skillData = [
@@ -23,19 +24,54 @@ const pieData = [
 ];
 const COLORS = ["hsl(230,75%,57%)", "hsl(250,60%,62%)", "hsl(225,18%,60%)", "hsl(0,72%,51%)"];
 
-const recentCandidates = [
-  { name: "Sarah Chen", role: "Frontend Dev", match: 92 },
-  { name: "James Wilson", role: "Data Scientist", match: 87 },
-  { name: "Priya Sharma", role: "Backend Dev", match: 85 },
-];
+interface Job {
+  id: number;
+  title: string;
+  applicants?: number;
+  postedAt?: string;
+  posted?: string;
+}
 
-const recentJobs = [
-  { title: "Senior React Developer", applicants: 23, posted: "2 days ago" },
-  { title: "ML Engineer", applicants: 18, posted: "5 days ago" },
-  { title: "DevOps Lead", applicants: 12, posted: "1 week ago" },
-];
+interface Candidate {
+  id: number;
+  name: string;
+  role: string;
+  match: number;
+}
 
 export default function RecruiterDashboard() {
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<Job[]>({
+    queryKey: ["recruiter-jobs"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/jobs", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to fetch jobs");
+      return response.json();
+    },
+  });
+
+  const { data: candidates = [], isLoading: candidatesLoading } = useQuery<Candidate[]>({
+    queryKey: ["recruiter-candidates"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/get_applicants", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to fetch applicants");
+      const data = await response.json();
+      return data.slice(0, 3);
+    },
+  });
+
+  const stats = [
+    { label: "Active Jobs", value: String(jobs.length), icon: Briefcase, color: "bg-primary/10 text-primary" },
+    { label: "Total Applicants", value: "348", icon: Users, color: "bg-accent/10 text-accent" },
+    { label: "Avg Match Score", value: "78%", icon: TrendingUp, color: "bg-emerald-100 text-emerald-600" },
+    { label: "Shortlisted", value: "56", icon: Star, color: "bg-amber-100 text-amber-600" },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -123,24 +159,36 @@ export default function RecruiterDashboard() {
         <div className="rounded-xl border border-border glass-card p-5 shadow-card hover-lift">
           <h3 className="mb-4 font-display text-sm font-semibold text-foreground">Recent Candidates</h3>
           <div className="space-y-3">
-            {recentCandidates.map(c => (
-              <div key={c.name} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2 transition-colors hover:bg-secondary">
-                <div><p className="text-sm font-medium text-foreground">{c.name}</p><p className="text-xs text-muted-foreground">{c.role}</p></div>
-                <span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">{c.match}%</span>
-              </div>
-            ))}
+            {candidatesLoading ? (
+              <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+            ) : candidates.length > 0 ? (
+              candidates.map(c => (
+                <div key={c.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2 transition-colors hover:bg-secondary">
+                  <div><p className="text-sm font-medium text-foreground">{c.name}</p><p className="text-xs text-muted-foreground">{c.role}</p></div>
+                  <span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">{c.match}%</span>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-xs text-muted-foreground">No recent candidates.</div>
+            )}
           </div>
         </div>
 
         <div className="rounded-xl border border-border glass-card p-5 shadow-card hover-lift">
           <h3 className="mb-4 font-display text-sm font-semibold text-foreground">Recent Jobs</h3>
           <div className="space-y-3">
-            {recentJobs.map(j => (
-              <div key={j.title} className="rounded-lg bg-secondary/50 px-3 py-2">
-                <p className="text-sm font-medium text-foreground">{j.title}</p>
-                <p className="text-xs text-muted-foreground">{j.applicants} applicants · {j.posted}</p>
-              </div>
-            ))}
+            {jobsLoading ? (
+              <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+            ) : jobs.length > 0 ? (
+              jobs.map(j => (
+                <div key={j.id} className="rounded-lg bg-secondary/50 px-3 py-2">
+                  <p className="text-sm font-medium text-foreground">{j.title}</p>
+                  <p className="text-xs text-muted-foreground">{j.applicants || 0} applicants · {j.posted || (j.postedAt ? new Date(j.postedAt).toLocaleDateString() : "Recently")}</p>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-xs text-muted-foreground">No recent jobs found.</div>
+            )}
           </div>
         </div>
       </div>

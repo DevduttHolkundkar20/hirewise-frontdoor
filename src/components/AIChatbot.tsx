@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, X, Send, Sparkles, User } from "lucide-react";
+import { Bot, X, Send, Sparkles, User, Maximize2, Minimize2 } from "lucide-react";
+import { toast } from "sonner";
 
 type Role = "recruiter" | "candidate";
 type Message = { id: number; from: "user" | "ai"; text: string };
@@ -10,24 +11,9 @@ const greetings: Record<Role, string> = {
   recruiter: "Hi! I'm your AI hiring assistant. Ask me to surface top candidates, explain rankings, or summarize applicants.",
 };
 
-const candidateReplies = [
-  "Here's a tip: for system design interviews, focus on trade-offs between consistency and availability. Want me to generate 3 practice questions?",
-  "Based on your profile, I recommend practicing **SQL joins** and **dynamic programming** this week — these show up often in mid-level interviews.",
-  "Great resume structure! Consider quantifying your impact (e.g. 'reduced latency by 30%') and adding a short 'Tech Stack' line near the top.",
-  "For behavioral questions, use the **STAR** method: Situation, Task, Action, Result. Keep stories under 2 minutes.",
-  "Career tip: roles tagged 'AI/ML' have grown 43% this quarter. Your React + Python combo is a strong match — want personalized job picks?",
-];
-
-const recruiterReplies = [
-  "Top backend candidates right now: **Sarah Chen** (92% match), **James Wilson** (87%), **Priya Sharma** (85%). All have 85%+ coding accuracy.",
-  "Sarah Chen ranks high because of: strong React/TS fundamentals, 156 problems solved, 94% accuracy, and a technical interview score of 88.",
-  "Hiring insight: your pipeline is 62% intermediate, 28% advanced. Consider posting a senior-focused role to balance levels.",
-  "Summary of James Wilson: ML specialist, 3 yrs at Meta, built a recommendation engine. Strong fit for Data Scientist roles — recommend technical round.",
-  "I suggest shortlisting candidates with match ≥ 85% and coding ≥ 85%. That filter returns **3** candidates today.",
-];
-
 export function AIChatbot({ role }: { role: Role }) {
   const [open, setOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -39,19 +25,51 @@ export function AIChatbot({ role }: { role: Role }) {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
-  const send = () => {
+  const send = async () => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || typing) return;
+
     const userMsg: Message = { id: Date.now(), from: "user", text };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setTyping(true);
-    const pool = role === "candidate" ? candidateReplies : recruiterReplies;
-    const reply = pool[Math.floor(Math.random() * pool.length)];
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:3000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: text,
+        }),
+      });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to get response from AI");
+      }
+
+      const data = await response.json();
+      const aiReply = data.response || "Sorry, I couldn't process that.";
+      
+      setMessages(prev => [...prev, { id: Date.now() + 1, from: "ai", text: aiReply }]);
+    } catch (error) {
+      console.error("Chat Error:", error);
+      setMessages(prev => [...prev, { 
+        id: Date.now() + 1, 
+        from: "ai", 
+        text: "I'm having trouble connecting to the server. Please try again later." 
+      }]);
+    } finally {
       setTyping(false);
-      setMessages(prev => [...prev, { id: Date.now() + 1, from: "ai", text: reply }]);
-    }, 1100 + Math.random() * 600);
+    }
   };
 
   return (
@@ -81,10 +99,18 @@ export function AIChatbot({ role }: { role: Role }) {
         {open && (
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0, 
+              scale: 1,
+              width: isFullScreen ? "calc(100vw - 3rem)" : "360px",
+              height: isFullScreen ? "calc(100vh - 8rem)" : "520px",
+              bottom: isFullScreen ? "6rem" : "6rem",
+              right: "1.5rem"
+            }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            transition={{ type: "spring", damping: 24, stiffness: 260 }}
-            className="fixed bottom-24 right-6 z-40 flex h-[520px] w-[360px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl glass-card shadow-card-hover"
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className={`fixed z-40 flex flex-col overflow-hidden rounded-2xl glass-card shadow-card-hover border border-border/60 transition-all`}
           >
             {/* Header */}
             <div className="flex items-center gap-3 border-b border-border/60 bg-gradient-ai px-4 py-3 text-ai-foreground">
@@ -92,8 +118,23 @@ export function AIChatbot({ role }: { role: Role }) {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="font-display text-sm font-semibold">HireSphere AI</p>
+                <p className="font-display text-sm font-semibold">HireWise AI</p>
                 <p className="text-[11px] opacity-80">Always online · Powered by AI</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-ai-foreground/80 hover:text-ai-foreground"
+                  title={isFullScreen ? "Exit Full Screen" : "Full Screen"}
+                >
+                  {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </button>
+                <button 
+                  onClick={() => setOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-ai-foreground/80 hover:text-ai-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
@@ -145,19 +186,20 @@ export function AIChatbot({ role }: { role: Role }) {
 
             {/* Input */}
             <div className="border-t border-border/60 bg-card/80 p-3 backdrop-blur">
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
+              <div className={`mx-auto flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20 ${isFullScreen ? "max-w-4xl" : "w-full"}`}>
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && send()}
                   placeholder={role === "candidate" ? "Ask about interviews, resume, jobs..." : "Ask about candidates, rankings..."}
                   className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  disabled={typing}
                 />
                 <motion.button
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={send}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || typing}
                   className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground disabled:opacity-40"
                 >
                   <Send className="h-3.5 w-3.5" />
@@ -170,3 +212,4 @@ export function AIChatbot({ role }: { role: Role }) {
     </>
   );
 }
+

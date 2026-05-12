@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Download, Star, Brain, Filter, Sparkles, X, CheckCircle, Users, Zap } from "lucide-react";
+import { Eye, Download, Star, Brain, Filter, Sparkles, X, CheckCircle, Users, Zap, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GradientProgress } from "@/components/GradientProgress";
+import { useQuery } from "@tanstack/react-query";
 
 type Applicant = {
   id: number; name: string; match: number; level: string; solved: number; accuracy: number;
@@ -10,15 +11,8 @@ type Applicant = {
   behavioral: number; overall: number; rank: string; tags: string[];
 };
 
-const applicants: Applicant[] = [
-  { id: 1, name: "Sarah Chen", match: 92, level: "Advanced", solved: 156, accuracy: 94, interview: 88, skills: ["React", "TypeScript", "Node.js"], email: "sarah@email.com", experience: "4 years at Google", projects: "E-commerce platform, Real-time chat app", behavioral: 85, overall: 90, rank: "Top 1%", tags: ["Strong Frontend", "High Coding Score", "Interview Ready"] },
-  { id: 2, name: "James Wilson", match: 87, level: "Advanced", solved: 132, accuracy: 89, interview: 82, skills: ["Python", "ML", "TensorFlow"], email: "james@email.com", experience: "3 years at Meta", projects: "Recommendation engine, NLP pipeline", behavioral: 80, overall: 84, rank: "Top 5%", tags: ["Strong ML", "AI Expert"] },
-  { id: 3, name: "Priya Sharma", match: 85, level: "Intermediate", solved: 98, accuracy: 86, interview: 79, skills: ["Java", "Spring", "AWS"], email: "priya@email.com", experience: "2 years at Amazon", projects: "Microservices platform, CI/CD pipeline", behavioral: 88, overall: 83, rank: "Top 5%", tags: ["Strong Backend", "Cloud Native"] },
-  { id: 4, name: "Alex Kim", match: 78, level: "Intermediate", solved: 87, accuracy: 82, interview: 75, skills: ["Go", "Kubernetes", "Docker"], email: "alex@email.com", experience: "2 years startup", projects: "Container orchestration tool", behavioral: 76, overall: 77, rank: "Top 10%", tags: ["DevOps", "Infra"] },
-  { id: 5, name: "Maria Lopez", match: 72, level: "Beginner", solved: 45, accuracy: 76, interview: 68, skills: ["JavaScript", "React", "CSS"], email: "maria@email.com", experience: "1 year intern", projects: "Portfolio site, Todo app", behavioral: 82, overall: 73, rank: "Top 20%", tags: ["Frontend", "Rising Star"] },
-];
-
 const rankStyle = (rank: string) => {
+  if (!rank) return "bg-secondary text-foreground";
   if (rank.includes("1%")) return "bg-gradient-to-r from-amber-400 to-orange-500 text-white";
   if (rank.includes("5%")) return "bg-gradient-ai text-ai-foreground";
   if (rank.includes("10%")) return "bg-gradient-primary text-primary-foreground";
@@ -35,21 +29,41 @@ export default function Applicants() {
 
   const [filters, setFilters] = useState({ minMatch: 0, minCoding: 0, minInterview: 0, skill: "" });
 
+  const { data: applicants = [], isLoading, error } = useQuery<Applicant[]>({
+    queryKey: ["applicants"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/get_applicants", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to fetch applicants");
+      return response.json();
+    },
+  });
+
   const toggleShortlist = (id: number) => setShortlisted(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const toggleCompare = (id: number) => setCompare(p => p.includes(id) ? p.filter(x => x !== id) : p.length < 3 ? [...p, id] : p);
 
   const filtered = useMemo(() => {
     let list = applicants.filter(a =>
-      a.match >= filters.minMatch &&
-      a.accuracy >= filters.minCoding &&
-      a.interview >= filters.minInterview &&
-      (filters.skill === "" || a.skills.some(s => s.toLowerCase().includes(filters.skill.toLowerCase())))
+      (a.match || 0) >= filters.minMatch &&
+      (a.accuracy || 0) >= filters.minCoding &&
+      (a.interview || 0) >= filters.minInterview &&
+      (filters.skill === "" || (a.skills || []).some(s => s.toLowerCase().includes(filters.skill.toLowerCase())))
     );
-    if (aiMode) list = [...list].sort((a, b) => b.overall - a.overall).slice(0, 3);
+    if (aiMode) list = [...list].sort((a, b) => (b.overall || 0) - (a.overall || 0)).slice(0, 3);
     return list;
-  }, [filters, aiMode]);
+  }, [applicants, filters, aiMode]);
 
   const compareList = applicants.filter(a => compare.includes(a.id));
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -125,21 +139,21 @@ export default function Applicants() {
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground">{a.name}</p>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      {a.tags.slice(0, 2).map(t => (
+                      {(a.tags || []).slice(0, 2).map(t => (
                         <span key={t} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{t}</span>
                       ))}
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ${rankStyle(a.rank)}`}>
-                      <Brain className="h-3 w-3" /> {a.rank}
+                      <Brain className="h-3 w-3" /> {a.rank || "Unranked"}
                     </span>
                   </td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">{a.match}%</span></td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.level}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.solved}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.accuracy}%</td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.interview}</td>
+                  <td className="px-4 py-3"><span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">{a.match || 0}%</span></td>
+                  <td className="px-4 py-3 text-muted-foreground">{a.level || "N/A"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{a.solved || 0}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{a.accuracy || 0}%</td>
+                  <td className="px-4 py-3 text-muted-foreground">{a.interview || 0}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       <IconBtn onClick={() => setSelected(a)} title="View"><Eye className="h-4 w-4" /></IconBtn>
@@ -178,7 +192,7 @@ export default function Applicants() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 font-display">
                   {selected.name}
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${rankStyle(selected.rank)}`}>{selected.rank}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${rankStyle(selected.rank)}`}>{selected.rank || "Unranked"}</span>
                 </DialogTitle>
               </DialogHeader>
 
@@ -191,7 +205,7 @@ export default function Applicants() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-ai">AI Insight</p>
                     <p className="mt-1 text-sm text-foreground">
-                      This candidate shows <span className="font-semibold">strong expertise</span> in {selected.skills[0]} and {selected.skills[1]}, with high coding accuracy ({selected.accuracy}%). Recommended for the <span className="font-semibold">technical round</span>.
+                      This candidate shows <span className="font-semibold">strong expertise</span> in {selected.skills?.[0] || "relevant skills"}, with high coding accuracy ({selected.accuracy || 0}%). Recommended for the <span className="font-semibold">technical round</span>.
                     </p>
                   </div>
                 </div>
@@ -200,29 +214,29 @@ export default function Applicants() {
               <div className="space-y-4 text-sm">
                 <div className="grid grid-cols-2 gap-3">
                   <Stat label="Email" value={selected.email} />
-                  <Stat label="Experience" value={selected.experience} />
-                  <Stat label="Match Score" value={`${selected.match}%`} />
-                  <Stat label="Coding Accuracy" value={`${selected.accuracy}%`} />
-                  <Stat label="Questions Solved" value={String(selected.solved)} />
-                  <Stat label="Technical Score" value={String(selected.interview)} />
-                  <Stat label="Behavioral Score" value={String(selected.behavioral)} />
-                  <Stat label="AI Hiring Score" value={String(selected.overall)} />
+                  <Stat label="Experience" value={selected.experience || "N/A"} />
+                  <Stat label="Match Score" value={`${selected.match || 0}%`} />
+                  <Stat label="Coding Accuracy" value={`${selected.accuracy || 0}%`} />
+                  <Stat label="Questions Solved" value={String(selected.solved || 0)} />
+                  <Stat label="Technical Score" value={String(selected.interview || 0)} />
+                  <Stat label="Behavioral Score" value={String(selected.behavioral || 0)} />
+                  <Stat label="AI Hiring Score" value={String(selected.overall || 0)} />
                 </div>
                 <div>
                   <p className="mb-1 text-xs font-medium text-muted-foreground">Smart Tags</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {selected.tags.map(t => <span key={t} className="rounded-full bg-ai/10 px-2.5 py-0.5 text-xs font-medium text-ai">{t}</span>)}
+                    {(selected.tags || []).map(t => <span key={t} className="rounded-full bg-ai/10 px-2.5 py-0.5 text-xs font-medium text-ai">{t}</span>)}
                   </div>
                 </div>
                 <div>
                   <p className="mb-1 text-xs font-medium text-muted-foreground">Skills</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {selected.skills.map(s => <span key={s} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{s}</span>)}
+                    {(selected.skills || []).map(s => <span key={s} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{s}</span>)}
                   </div>
                 </div>
                 <div>
                   <p className="mb-1 text-xs font-medium text-muted-foreground">Projects</p>
-                  <p className="text-foreground">{selected.projects}</p>
+                  <p className="text-foreground">{selected.projects || "No projects listed."}</p>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button className="flex-1 rounded-lg bg-gradient-primary py-2 text-xs font-semibold text-primary-foreground transition-shadow hover:shadow-hero-glow">
@@ -250,16 +264,16 @@ export default function Applicants() {
               <div key={c.id} className="rounded-xl border border-border bg-card p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="font-display text-sm font-bold text-foreground">{c.name}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${rankStyle(c.rank)}`}>{c.rank}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${rankStyle(c.rank)}`}>{c.rank || "Unranked"}</span>
                 </div>
-                <CompareRow label="Match" value={c.match} />
-                <CompareRow label="Coding" value={c.accuracy} />
-                <CompareRow label="Interview" value={c.interview} />
-                <CompareRow label="Behavioral" value={c.behavioral} />
-                <CompareRow label="Overall" value={c.overall} highlight />
+                <CompareRow label="Match" value={c.match || 0} />
+                <CompareRow label="Coding" value={c.accuracy || 0} />
+                <CompareRow label="Interview" value={c.interview || 0} />
+                <CompareRow label="Behavioral" value={c.behavioral || 0} />
+                <CompareRow label="Overall" value={c.overall || 0} highlight />
                 <p className="mt-3 mb-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Skills</p>
                 <div className="flex flex-wrap gap-1">
-                  {c.skills.map(s => <span key={s} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">{s}</span>)}
+                  {(c.skills || []).map(s => <span key={s} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">{s}</span>)}
                 </div>
               </div>
             ))}

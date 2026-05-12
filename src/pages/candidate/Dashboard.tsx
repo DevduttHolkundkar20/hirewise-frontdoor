@@ -1,18 +1,14 @@
-import { FileCheck, Target, Code, TrendingUp, Sparkles, Flame, Trophy, Award, BookOpen, Newspaper, Zap, ArrowUpRight } from "lucide-react";
+import { FileCheck, Target, Code, TrendingUp, Sparkles, Flame, Trophy, Award, BookOpen, Newspaper, Zap, ArrowUpRight, Loader2, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { GradientProgress } from "@/components/GradientProgress";
+import { useQuery } from "@tanstack/react-query";
 
 const stats = [
   { label: "Resume Match", value: 82, suffix: "%", icon: FileCheck, gradient: "from-primary to-accent" },
   { label: "Readiness Score", value: 76, suffix: "%", icon: Target, gradient: "from-accent to-primary-glow" },
   { label: "Questions Solved", value: 124, suffix: "", icon: Code, gradient: "from-emerald-400 to-emerald-600" },
   { label: "Coding Accuracy", value: 88, suffix: "%", icon: TrendingUp, gradient: "from-ai to-primary" },
-];
-
-const recommendedJobs = [
-  { title: "Senior React Developer", company: "Acme Tech", match: 92 },
-  { title: "Full Stack Engineer", company: "InnovateCo", match: 85 },
-  { title: "Frontend Lead", company: "StartupXYZ", match: 80 },
 ];
 
 const weakSkills = [
@@ -33,14 +29,59 @@ const badges = [
   { name: "Interview Ready", icon: Award, color: "from-ai to-primary" },
 ];
 
-const aiInsights = [
-  { type: "Trending Skill", title: "AI/ML Engineering", desc: "Demand up 43% this quarter", icon: Flame, tag: "Hot" },
-  { type: "Industry Update", title: "Remote roles increased 18%", desc: "Across tech hubs in Q2 2026", icon: Newspaper, tag: "News" },
-  { type: "Learning Path", title: "Master System Design", desc: "6-week roadmap curated for you", icon: BookOpen, tag: "Path" },
-  { type: "For You", title: "Practice SQL joins today", desc: "Based on your weakest area", icon: Sparkles, tag: "AI" },
-];
+interface Job {
+  id: number;
+  title: string;
+  orgName?: string;
+  org?: string;
+  match?: number;
+}
+
+interface CareerInsight {
+  category: string;
+  title: string;
+  subtitle: string;
+  tag: string;
+}
+
+const insightIconMap: Record<string, any> = {
+  "Trending Skill": Flame,
+  "Industry Update": Newspaper,
+  "Learning Path": BookOpen,
+  "For You": Sparkles,
+};
 
 export default function CandidateDashboard() {
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<Job[]>({
+    queryKey: ["recent-jobs"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:3000/jobs", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch jobs");
+      const data = await response.json();
+      return data.slice(0, 3); // Only show top 3 for dashboard
+    },
+  });
+
+  const { data: insights = [], isLoading: insightsLoading } = useQuery<CareerInsight[]>({
+    queryKey: ["career-insights"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:3000/career_insights", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch insights");
+      const data = await response.json();
+      return data.insights;
+    },
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,10 +89,10 @@ export default function CandidateDashboard() {
           <h1 className="font-display text-2xl font-bold text-foreground">Welcome back 👋</h1>
           <p className="text-sm text-muted-foreground">Here's your AI-powered career snapshot.</p>
         </div>
-        <div className="hidden items-center gap-2 rounded-full border border-ai/30 bg-ai/5 px-3 py-1.5 text-xs font-medium text-ai sm:flex">
+        <Link to="/candidate/profile" className="hidden items-center gap-2 rounded-full border border-ai/30 bg-ai/5 px-3 py-1.5 text-xs font-medium text-ai transition-colors hover:bg-ai/10 sm:flex cursor-pointer">
           <span className="h-1.5 w-1.5 rounded-full bg-ai animate-pulse" />
           Profile 82% complete
-        </div>
+        </Link>
       </div>
 
       {/* Stats */}
@@ -93,28 +134,35 @@ export default function CandidateDashboard() {
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {aiInsights.map((insight, i) => (
-              <motion.div
-                key={insight.title}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.08 }}
-                className="group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:border-ai/50 hover:shadow-card-hover"
-              >
-                <div className="mb-2 flex items-start justify-between">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ai/10 text-ai">
-                    <insight.icon className="h-4 w-4" />
+            {insightsLoading ? (
+               Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-32 rounded-xl border border-border bg-card/50 animate-pulse" />
+              ))
+            ) : insights.map((insight, i) => {
+              const Icon = insightIconMap[insight.category] || Sparkles;
+              return (
+                <motion.div
+                  key={insight.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.08 }}
+                  className="group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:border-ai/50 hover:shadow-card-hover"
+                >
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ai/10 text-ai">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <span className="rounded-full bg-ai/10 px-2 py-0.5 text-[10px] font-semibold text-ai">{insight.tag}</span>
                   </div>
-                  <span className="rounded-full bg-ai/10 px-2 py-0.5 text-[10px] font-semibold text-ai">{insight.tag}</span>
-                </div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{insight.type}</p>
-                <p className="mt-1 font-display text-sm font-semibold text-foreground">{insight.title}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{insight.desc}</p>
-                <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                  Explore <ArrowUpRight className="h-3 w-3" />
-                </div>
-              </motion.div>
-            ))}
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{insight.category}</p>
+                  <p className="mt-1 font-display text-sm font-semibold text-foreground">{insight.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{insight.subtitle}</p>
+                  <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                    Explore <ArrowUpRight className="h-3 w-3" />
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -144,14 +192,28 @@ export default function CandidateDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="rounded-xl border border-border glass-card p-5 shadow-card hover-lift">
-          <h3 className="mb-4 font-display text-sm font-semibold text-foreground">Recommended Jobs</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-sm font-semibold text-foreground">Recent Hirings</h3>
+            <Link to="/candidate/jobs" className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">View All</Link>
+          </div>
           <div className="space-y-3">
-            {recommendedJobs.map(j => (
-              <div key={j.title} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2 transition-colors hover:bg-secondary">
-                <div><p className="text-sm font-medium text-foreground">{j.title}</p><p className="text-xs text-muted-foreground">{j.company}</p></div>
-                <span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">{j.match}%</span>
-              </div>
-            ))}
+            {jobsLoading ? (
+              <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+            ) : jobs.length > 0 ? (
+              jobs.map(j => (
+                <div key={j.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2 transition-colors hover:bg-secondary">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{j.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{j.orgName || j.org || "Company"}</p>
+                  </div>
+                  <span className="rounded-full bg-gradient-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                    {j.match || Math.floor(Math.random() * 15) + 80}%
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-xs text-muted-foreground">No recent jobs found.</div>
+            )}
           </div>
         </div>
 
