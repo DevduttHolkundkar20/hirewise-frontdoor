@@ -1,6 +1,7 @@
 import { Briefcase, Users, TrendingUp, Star, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const stats_initial = [
   { label: "Active Jobs", value: "0", icon: Briefcase, color: "bg-primary/10 text-primary" },
@@ -44,7 +45,7 @@ export default function RecruiterDashboard() {
     queryKey: ["recruiter-jobs"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/jobs", {
+      const response = await fetch(`${API_BASE_URL}/jobs`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to fetch jobs");
@@ -56,7 +57,7 @@ export default function RecruiterDashboard() {
     queryKey: ["recruiter-candidates"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/get_applicants", {
+      const response = await fetch(`${API_BASE_URL}/get_applicants`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to fetch applicants");

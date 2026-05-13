@@ -3,6 +3,7 @@ import { X, Loader2, Sparkles } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function PostJob() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function PostJob() {
   const postJobMutation = useMutation({
     mutationFn: async (jobData: any) => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/post_job", {
+      const response = await fetch(`${API_BASE_URL}/post_job`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
