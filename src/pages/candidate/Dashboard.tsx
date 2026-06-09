@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { GradientProgress } from "@/components/GradientProgress";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const stats = [
   { label: "Resume Match", value: 82, suffix: "%", icon: FileCheck, gradient: "from-primary to-accent" },
@@ -56,7 +57,7 @@ export default function CandidateDashboard() {
     queryKey: ["recent-jobs"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/jobs`, {
+      const response = await fetch(`${API_BASE_URL}/jobs`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
@@ -71,7 +72,7 @@ export default function CandidateDashboard() {
     queryKey: ["career-insights"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/career_insights`, {
+      const response = await fetch(`${API_BASE_URL}/career_insights`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },

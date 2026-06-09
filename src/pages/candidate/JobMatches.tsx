@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Briefcase, Target, Sparkles } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface Job {
   id: number;
@@ -24,8 +25,10 @@ export default function JobMatches() {
     queryKey: ["jobs"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/jobs`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      const response = await fetch(`${API_BASE_URL}/jobs`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
       });
       if (!response.ok) throw new Error("Failed to fetch jobs");
       return response.json();
@@ -35,7 +38,7 @@ export default function JobMatches() {
   const applyMutation = useMutation({
     mutationFn: async (jobId: number) => {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/apply_job`, {
+      const response = await fetch(`${API_BASE_URL}/apply_job`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

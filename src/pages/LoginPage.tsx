@@ -5,6 +5,7 @@ import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { AuthBackground } from "@/components/AuthBackground";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const LoginPage = () => {
   const { role } = useParams<{ role: string }>();
@@ -17,7 +18,7 @@ const LoginPage = () => {
 
   const loginMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

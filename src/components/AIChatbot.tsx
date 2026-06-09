@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Sparkles, User, Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/api-config";
 
 type Role = "recruiter" | "candidate";
 type Message = { id: number; from: "user" | "ai"; text: string };
@@ -36,7 +37,7 @@ export function AIChatbot({ role }: { role: Role }) {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/chat`, {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

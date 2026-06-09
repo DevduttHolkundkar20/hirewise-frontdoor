@@ -4,6 +4,7 @@ import { Eye, Download, Star, Brain, Filter, Sparkles, X, CheckCircle, Users, Za
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GradientProgress } from "@/components/GradientProgress";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/api-config";
 
 type Applicant = {
   id: number; name: string; match: number; level: string; solved: number; accuracy: number;
@@ -33,7 +34,7 @@ export default function Applicants() {
     queryKey: ["applicants"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/get_applicants`, {
+      const response = await fetch(`${API_BASE_URL}/get_applicants`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to fetch applicants");

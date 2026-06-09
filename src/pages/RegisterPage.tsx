@@ -5,6 +5,7 @@ import { ArrowLeft, Mail, Lock, User, Building2, Phone, Loader2, Eye, EyeOff } f
 import { AuthBackground } from "@/components/AuthBackground";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const RegisterPage = () => {
   const { role } = useParams<{ role: string }>();
@@ -20,7 +21,7 @@ const RegisterPage = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/register`, {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

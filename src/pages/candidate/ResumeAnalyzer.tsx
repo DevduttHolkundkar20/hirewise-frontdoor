@@ -5,6 +5,7 @@ import { CircularProgress } from "@/components/CircularProgress";
 import { GradientProgress } from "@/components/GradientProgress";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface AnalysisResult {
   score: number;
@@ -24,7 +25,7 @@ export default function ResumeAnalyzer() {
       formData.append("resume", file);
       formData.append("job_profile", jobProfile);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze_resume`, {
+      const response = await fetch(`${API_BASE_URL}/analyze_resume`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
