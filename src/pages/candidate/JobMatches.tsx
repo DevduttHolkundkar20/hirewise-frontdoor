@@ -24,10 +24,8 @@ export default function JobMatches() {
     queryKey: ["jobs"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/jobs", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/jobs`, {
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to fetch jobs");
       return response.json();
@@ -37,7 +35,7 @@ export default function JobMatches() {
   const applyMutation = useMutation({
     mutationFn: async (jobId: number) => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/apply_job", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/apply_job`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

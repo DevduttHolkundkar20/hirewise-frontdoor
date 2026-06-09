@@ -36,7 +36,7 @@ export function AIChatbot({ role }: { role: Role }) {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:3000/chat", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

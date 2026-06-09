@@ -56,7 +56,7 @@ export default function CandidateDashboard() {
     queryKey: ["recent-jobs"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:3000/jobs", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/jobs`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
@@ -71,7 +71,7 @@ export default function CandidateDashboard() {
     queryKey: ["career-insights"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:3000/career_insights", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/career_insights`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },

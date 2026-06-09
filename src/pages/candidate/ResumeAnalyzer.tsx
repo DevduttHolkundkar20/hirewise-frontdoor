@@ -24,7 +24,7 @@ export default function ResumeAnalyzer() {
       formData.append("resume", file);
       formData.append("job_profile", jobProfile);
 
-      const response = await fetch("http://127.0.0.1:3000/analyze_resume", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze_resume`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

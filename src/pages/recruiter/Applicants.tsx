@@ -33,7 +33,7 @@ export default function Applicants() {
     queryKey: ["applicants"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/get_applicants", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/get_applicants`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to fetch applicants");

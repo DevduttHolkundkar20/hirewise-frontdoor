@@ -16,7 +16,7 @@ export default function PostJob() {
   const postJobMutation = useMutation({
     mutationFn: async (jobData: any) => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/post_job", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/post_job`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

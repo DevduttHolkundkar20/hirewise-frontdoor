@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, UserCircle, FileSearch, Briefcase, GraduationCap, TrendingUp, LogOut, Sparkles, Bell } from "lucide-react";
+import { LayoutDashboard, UserCircle, FileSearch, Briefcase, GraduationCap, TrendingUp, LogOut, Sparkles, Bell, Code2 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
@@ -13,6 +13,7 @@ const items = [
   { title: "Resume Analyzer", url: "/candidate/resume", icon: FileSearch },
   { title: "Job Matches", url: "/candidate/jobs", icon: Briefcase },
   { title: "Interview Prep", url: "/candidate/interview", icon: GraduationCap },
+  { title: "Practice Coding", url: "/candidate/practice", icon: Code2 },
   { title: "Performance", url: "/candidate/performance", icon: TrendingUp },
 ];
 

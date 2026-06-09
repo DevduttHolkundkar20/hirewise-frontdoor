@@ -21,6 +21,7 @@ import ResumeAnalyzer from "./pages/candidate/ResumeAnalyzer";
 import JobMatches from "./pages/candidate/JobMatches";
 import InterviewPrep from "./pages/candidate/InterviewPrep";
 import Performance from "./pages/candidate/Performance";
+import PracticeQuestions from "./pages/candidate/PracticeQuestions";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="resume" element={<ResumeAnalyzer />} />
             <Route path="jobs" element={<JobMatches />} />
             <Route path="interview" element={<InterviewPrep />} />
+            <Route path="practice" element={<PracticeQuestions />} />
             <Route path="performance" element={<Performance />} />
           </Route>
 
